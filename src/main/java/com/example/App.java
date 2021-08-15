@@ -1,6 +1,8 @@
 package com.example;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -42,8 +44,6 @@ public final class App {
 
                 url = new URL("https://api.github.com/orgs/apache/repos?page=" + (index+1) + "&per_page=100");
                 status = connect(url);
-                System.out.println(url);
-                System.out.println(status);
 
                 data = readPage(status, line, responseContent);
 
@@ -94,9 +94,6 @@ public final class App {
 
                         url = new URL("https://api.github.com/repos/apache/"+ max_repos.get(i) + "/contributors?page=" + (index+1) + "&per_page=100");
                         status = connect(url);
-            
-                        System.out.println(url);
-                        System.out.println(status);
         
                         data = readPage(status, line, responseContent);
     
@@ -126,13 +123,9 @@ public final class App {
                 for(int k = 0; k < temp_arr.length; k++)                                
                     temp_list.add(Integer.valueOf(temp_arr[k].toString()));
 
-                //System.out.println(temp_list);
-
                 mapAddDataCont(temp_list, max_users, max_contributions, user_map);
 
             }
-
-            System.out.println(max_users);
 
             // User sayfasından alınacak veriler için             
             ArrayList<String> companies = new ArrayList<String>();
@@ -152,9 +145,6 @@ public final class App {
                 url = new URL("https://api.github.com/users/" + max_users_trimmed.get(i));
 
                 status = connect(url);
-        
-                System.out.println(url);
-                System.out.println(status);
     
                 data = readPage(status, line, responseContent);
 
@@ -181,18 +171,28 @@ public final class App {
                 responseContent = new StringBuffer();
             }
 
+            File text = new File("info.txt");
+            FileWriter writer = new FileWriter(text);
+
+
             for(int i = 0; i < TOTAL_USERS; i++) {
 
                 String [] users = max_users.get(i).split(" ");
                 String repo = users[0];
                 String user = users[1];
 
-                System.out.println("repo:" + repo + ", user:" + user + ", location:" + locations.get(i)
-                 + ", company:" + companies.get(i) + ", contributions:" + contributions_map.get(user));
+                String info = "repo:" + repo + ", user:" + user + ", location:" + locations.get(i)
+                + ", company:" + companies.get(i) + ", contributions:" + contributions_map.get(max_users.get(i)) + "\n";
+
+                writer.write(info);
             }
+
+            writer.close();
          
 
         } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         } catch (org.json.JSONException e) {
             System.err.println("API call limit exceeded");
@@ -212,6 +212,7 @@ public final class App {
             connection = (HttpURLConnection) url.openConnection();
 
             //Request setup
+            connection.setRequestProperty ("Authorization", "token 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");
             connection.setRequestMethod("GET");
             connection.setConnectTimeout(10000);
             connection.setReadTimeout(10000);
@@ -315,8 +316,6 @@ public final class App {
             arr_string.add(h_map.get(temp_list.get(i_holder)));
             temp_list.remove(i_holder);
 
-            System.out.println(arr_string.get(i));
-
         }
     }
 
@@ -326,8 +325,6 @@ public final class App {
        
             arr_int.add(temp_list.get(i));
             arr_string.add(h_map.get(temp_list.get(i)));
-
-            // System.out.println(arr_string.get(i));
 
         }
     }
